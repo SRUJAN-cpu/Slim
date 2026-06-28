@@ -1,7 +1,7 @@
 # slim
 
-[![ci](https://github.com/srujan-cpu/slim/actions/workflows/ci.yml/badge.svg)](https://github.com/srujan-cpu/slim/actions/workflows/ci.yml)
-[![release](https://img.shields.io/github/v/release/srujan-cpu/slim?include_prereleases&sort=semver)](https://github.com/srujan-cpu/slim/releases)
+[![ci](https://github.com/SRUJAN-cpu/Slim/actions/workflows/ci.yml/badge.svg)](https://github.com/SRUJAN-cpu/Slim/actions/workflows/ci.yml)
+[![release](https://img.shields.io/github/v/release/SRUJAN-cpu/Slim?include_prereleases&sort=semver)](https://github.com/SRUJAN-cpu/Slim/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **Shrink AI-agent command output so it burns fewer tokens.**
@@ -28,13 +28,13 @@ untracked (3):
 ## Install
 
 ### Download the .exe (no Python needed) — easiest
-1. Grab `slim.exe` from the [latest release](https://github.com/srujan-cpu/slim/releases/latest).
+1. Grab `slim.exe` from the [latest release](https://github.com/SRUJAN-cpu/Slim/releases/latest).
 2. Put it in a folder on your `PATH`.
 3. Run `slim git status`. (You only need `git`/`npm` installed — the tools it wraps.)
 
 ### Or install with pip
 ```
-pip install git+https://github.com/srujan-cpu/slim
+pip install git+https://github.com/SRUJAN-cpu/Slim
 ```
 
 ## Quick start
