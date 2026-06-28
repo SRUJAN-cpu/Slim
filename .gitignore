@@ -1,0 +1,12 @@
+# Build artifacts
+build/
+dist/
+vendor/
+*.spec
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Local stats (now lives in ~/.slim, but ignore any stray copies)
+.slim_stats.json
