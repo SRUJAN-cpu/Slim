@@ -3,7 +3,8 @@
 > Install as `slim-shady`; the command you run is `slim`.
 
 [![ci](https://github.com/SRUJAN-cpu/slim-shady/actions/workflows/ci.yml/badge.svg)](https://github.com/SRUJAN-cpu/slim-shady/actions/workflows/ci.yml)
-[![release](https://img.shields.io/github/v/release/SRUJAN-cpu/slim-shady?include_prereleases&sort=semver)](https://github.com/SRUJAN-cpu/slim-shady/releases)
+[![PyPI](https://img.shields.io/pypi/v/slim-shady)](https://pypi.org/project/slim-shady/)
+[![downloads](https://static.pepy.tech/badge/slim-shady)](https://pepy.tech/project/slim-shady)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 **Shrink AI-agent command output so it burns fewer tokens.**
@@ -29,15 +30,16 @@ untracked (3):
 
 ## Install
 
-### Download the .exe (no Python needed) — easiest
+### With pip
+```
+pip install slim-shady
+```
+Gives you the `slim` command (plus `tiktoken` for real token counts).
+
+### Or download the .exe (no Python needed)
 1. Grab `slim.exe` from the [latest release](https://github.com/SRUJAN-cpu/slim-shady/releases/latest).
 2. Put it in a folder on your `PATH`.
 3. Run `slim git status`. (You only need `git`/`npm` installed — the tools it wraps.)
-
-### Or install with pip
-```
-pip install git+https://github.com/SRUJAN-cpu/slim-shady
-```
 
 ## Quick start
 
