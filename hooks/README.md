@@ -26,7 +26,7 @@ Add this to `.claude/settings.json` (project) or `~/.claude/settings.json` (glob
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash",
+        "matcher": "*",
         "hooks": [
           { "type": "command", "command": "slim hook" }
         ]
@@ -36,8 +36,13 @@ Add this to `.claude/settings.json` (project) or `~/.claude/settings.json` (glob
 }
 ```
 
-The hook runs `slim hook`, which reads Claude Code's command JSON on stdin and,
+The hook runs `slim hook`, which reads the runtime's command JSON on stdin and,
 for plain `git`/`npm` commands, returns a rewrite to `slim git`/`slim npm`.
+
+The matcher is `*` (all tools) on purpose: Windows agents may run commands
+through the Bash, PowerShell, or cmd tool, and a `"Bash"`-only matcher would miss
+the others. `slim hook` decides from the command text, so non-shell tools (Read,
+Edit, ...) are ignored instantly.
 
 ## Confirm it works
 Ask the agent to run `git status`. It becomes `slim git status` behind the
@@ -53,5 +58,5 @@ scenes and you'll see the compact output. Watch the savings add up with
 ## Requirements
 - `slim` must be on PATH (it is, after `pip install` or copying `slim.exe` to a
   PATH folder).
-- Works on Windows: Claude Code runs hooks via Git Bash, and `slim hook` is a
-  normal command — no `jq` or extra tools needed.
+- Works on Windows regardless of which shell tool the agent uses (Bash /
+  PowerShell / cmd); `slim hook` is a normal command — no `jq` or extra tools.

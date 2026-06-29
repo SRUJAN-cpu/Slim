@@ -24,7 +24,7 @@ import installer
 from filters import git_filter, npm_filter
 from filters.common import estimate_tokens, tokenizer_name, is_real_tokenizer
 
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 # Tools slim wraps, and operators that make a blind `slim ` prefix unsafe.
 WRAP = ("git", "npm")
@@ -209,16 +209,28 @@ def cmd_doctor():
 
 
 def cmd_hook():
-    """Read Claude Code's PreToolUse JSON on stdin; if it's a plain git/npm
-    command, emit JSON that rewrites it to `slim git/npm ...`. Else emit nothing."""
-    try:
-        data = json.load(sys.stdin)
-    except Exception:
-        return 0  # malformed input -> do nothing, let the command run as-is
+    """PreToolUse rewriter: read the runtime's JSON on stdin and, for a plain
+    git/npm command, emit JSON that rewrites it to `slim git/npm ...`. Decides
+    from the command, not the tool name, so it works for any shell tool.
+    Set SLIM_HOOK_DEBUG=1 to log raw input to ~/.slim/hook_debug.log."""
+    raw_in = sys.stdin.read()
 
-    if data.get("tool_name") != "Bash":
+    if os.environ.get("SLIM_HOOK_DEBUG"):
+        try:
+            os.makedirs(STATS_DIR, exist_ok=True)
+            with open(os.path.join(STATS_DIR, "hook_debug.log"), "a", encoding="utf-8") as f:
+                f.write(raw_in + "\n")
+        except Exception:
+            pass
+
+    try:
+        data = json.loads(raw_in)
+    except Exception:
         return 0
+
     cmd = data.get("tool_input", {}).get("command", "")
+    if not isinstance(cmd, str):
+        return 0
     stripped = cmd.strip()
     if not stripped or stripped.startswith("slim "):
         return 0

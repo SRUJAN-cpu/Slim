@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "slim-shady"
-version = "0.1.1"
+version = "0.1.2"
 description = "Shrink AI-agent command output to save tokens (git + npm, Windows)"
 readme = "README.md"
 requires-python = ">=3.8"

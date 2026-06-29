@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2
+- Fix: the auto-rewrite hook now fires for any shell tool (Bash, PowerShell, cmd),
+  not just Bash. `slim hook` decides from the command, and `slim init` registers
+  matcher `*`. Re-running `slim init` upgrades an older `Bash`-matcher install.
+- Add `SLIM_HOOK_DEBUG=1` to log raw hook input to `~/.slim/hook_debug.log`.
+
 ## 0.1.1
 First PyPI release (`pip install slim-shady`). No functional changes from 0.1.0.
 

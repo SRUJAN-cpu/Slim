@@ -1,15 +1,15 @@
 """`slim init` - install the Claude Code auto-rewrite hook.
 
-Registers a PreToolUse/Bash hook in settings.json whose command is `slim hook`.
-After this, Claude Code transparently rewrites `git ...`/`npm ...` to
-`slim git ...`/`slim npm ...`. No separate hook file is written -- the rewrite
-logic lives inside slim itself (`slim hook`), so this works for both pip
+Registers a PreToolUse hook in settings.json whose command is `slim hook`, with
+matcher `*` so it fires for every shell tool (Bash, PowerShell, cmd, ...). The
+rewrite logic lives inside slim (`slim hook`), so this works for both pip
 installs and the standalone .exe.
 """
 import json
 import os
 
 HOOK_COMMAND = "slim hook"
+MATCHER = "*"
 
 
 def _settings_path(global_scope):
@@ -57,20 +57,29 @@ def init(global_scope=False):
     hooks = settings.setdefault("hooks", {})
     pretool = hooks.setdefault("PreToolUse", [])
 
-    if _already_installed(pretool):
-        print(f"slim: hook already installed in {scope} settings ({path}). Nothing to do.")
-        return 0
+    # Upgrade an existing slim entry whose matcher is out of date (e.g. old "Bash").
+    upgraded = False
+    for entry in pretool:
+        if any(h.get("command") == HOOK_COMMAND for h in entry.get("hooks", [])):
+            if entry.get("matcher") != MATCHER:
+                entry["matcher"] = MATCHER
+                upgraded = True
+            elif not upgraded:
+                print(f"slim: hook already installed in {scope} settings ({path}). Nothing to do.")
+                return 0
 
-    pretool.append({
-        "matcher": "Bash",
-        "hooks": [{"type": "command", "command": HOOK_COMMAND}],
-    })
+    if not upgraded:
+        pretool.append({
+            "matcher": MATCHER,
+            "hooks": [{"type": "command", "command": HOOK_COMMAND}],
+        })
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(settings, f, indent=2)
 
-    print(f"slim: installed auto-rewrite hook in {scope} settings.")
+    verb = "updated" if upgraded else "installed"
+    print(f"slim: {verb} auto-rewrite hook in {scope} settings (matcher '{MATCHER}').")
     print(f"  file: {path}")
     print("  Restart Claude Code (or start a new session) to activate it.")
     print("  git/npm commands the agent runs will now be compressed automatically.")
