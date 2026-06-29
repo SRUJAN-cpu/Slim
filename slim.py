@@ -138,7 +138,7 @@ def cmd_gain():
     if is_real_tokenizer():
         print(f"  (~ counted with {tokenizer_name()}; approximates Claude's tokenizer)")
     else:
-        print(f"  (~ rough {tokenizer_name()}; pip install slim-cli for real counts)")
+        print(f"  (~ rough {tokenizer_name()}; pip install slim-shady for real counts)")
 
     big = s["biggest"]
     if big["cmd"]:
@@ -188,7 +188,7 @@ def cmd_doctor():
 
     real = is_real_tokenizer()
     check(f"tokenizer: {tokenizer_name()}", True,
-          "" if real else "(estimate -- pip install slim-cli for real counts)")
+          "" if real else "(estimate -- pip install slim-shady for real counts)")
 
     proj_on, proj_path = installer.is_installed(False)
     glob_on, glob_path = installer.is_installed(True)
