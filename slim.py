@@ -24,7 +24,7 @@ import installer
 from filters import git_filter, npm_filter
 from filters.common import estimate_tokens, tokenizer_name, is_real_tokenizer
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 
 # Tools slim wraps, and operators that make a blind `slim ` prefix unsafe.
 WRAP = ("git", "npm")

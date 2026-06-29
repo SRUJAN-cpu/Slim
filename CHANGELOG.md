@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.1
+First PyPI release (`pip install slim-shady`). No functional changes from 0.1.0.
+
 ## 0.1.0
 First public release.
 
