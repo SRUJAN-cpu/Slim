@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "slim-shady"
-version = "0.1.4"
+version = "0.2.0"
 description = "Shrink AI-agent command output to save tokens (git + npm, Windows)"
 readme = "README.md"
 requires-python = ">=3.8"
@@ -18,13 +18,19 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Build Tools",
     "Topic :: Utilities",
 ]
 
 # Real token counting via a local tokenizer. (The .exe build bundles this so the
-# binary works offline; chars/4 stays only as a crash-safety fallback.)
-dependencies = ["tiktoken>=0.7"]
+# binary works offline; chars/4 stays only as a crash-safety fallback.) Upper
+# bound pinned so a future breaking tiktoken release can't silently break slim.
+dependencies = ["tiktoken>=0.7,<1.0"]
 
 [project.urls]
 Homepage = "https://github.com/SRUJAN-cpu/slim-shady"
