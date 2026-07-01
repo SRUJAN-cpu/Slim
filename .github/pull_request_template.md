@@ -1,6 +1,24 @@
-## What does this PR do?
+## Description
 
-<!-- One or two sentences. What changed and why. -->
+**Summary** — one or two sentences on what this PR does and why:
+
+<!-- e.g. "Fixes git diff ignoring file paths, so `slim git diff <file>` scopes correctly." -->
+
+**What's actually included** — list every real change, not just the headline:
+
+<!--
+- Changed X in file Y to do Z
+- Added a test for ...
+- Updated docs for ...
+-->
+
+**What's explicitly NOT included** (if relevant):
+
+<!-- e.g. "Does not touch the npm filter"; "No version bump — maintainer does that at release" -->
+
+**Motivation / context:**
+
+<!-- Why is this needed? Link an issue, a bug report, a discussion, etc. -->
 
 ## Type of change
 
