@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability
+    url: https://github.com/SRUJAN-cpu/slim-shady/security/policy
+    about: Please do NOT file a public issue for security bugs — see SECURITY.md for private disclosure instructions.
