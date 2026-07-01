@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+- slim now never emits output larger than the original: if compression doesn't
+  shrink a command, the raw output is returned unchanged. No more "got bigger"
+  runs, so `slim gain` is a clean cumulative "saved you X tokens".
+- `slim gain` report reworked to lead with the total saved.
+
 ## 0.1.3
 - Fix: `git diff`/`git show` now respect the paths you pass, summarizing only
   those files instead of the whole working tree. Removes wrong-scope output and

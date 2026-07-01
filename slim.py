@@ -24,7 +24,7 @@ import installer
 from filters import git_filter, npm_filter
 from filters.common import estimate_tokens, tokenizer_name, is_real_tokenizer
 
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 # Tools slim wraps, and operators that make a blind `slim ` prefix unsafe.
 WRAP = ("git", "npm")
@@ -43,8 +43,7 @@ def _blank_stats():
         "runs": 0,
         "tokens_raw": 0,
         "tokens_slim": 0,
-        "losses": 0,                       # times slim output was >= raw
-        "by_tool": {},                     # {"git": {runs, raw, slim}, ...}
+        "by_tool": {},                       # {"git": {runs, raw, slim}, ...}
         "biggest": {"cmd": "", "saved": 0},  # single best save so far
     }
 
@@ -68,14 +67,13 @@ def _save_stats(stats):
 
 
 def _record(tool, cmd_str, raw_t, slim_t):
+    # slim_t is the tokens we actually emit; never > raw_t (see main), so saved >= 0.
     saved = raw_t - slim_t
 
     stats = _load_stats()
     stats["runs"] += 1
     stats["tokens_raw"] += raw_t
     stats["tokens_slim"] += slim_t
-    if slim_t >= raw_t:
-        stats["losses"] += 1
 
     t = stats["by_tool"].setdefault(tool, {"runs": 0, "raw": 0, "slim": 0})
     t["runs"] += 1
@@ -124,39 +122,33 @@ def cmd_gain():
     saved = raw - slim
     pct = (saved / raw * 100) if raw else 0
 
-    print("=" * 44)
-    print("  slim gain report")
-    print("=" * 44)
+    print("=" * 48)
     if s["runs"] == 0:
-        print("  No commands run yet. Try:  slim git status")
+        print("  slim hasn't saved anything yet. Try:  slim git status")
+        print("=" * 48)
         return
-    print(f"  commands run : {s['runs']:,}")
-    print(f"  tokens raw   : ~{raw:,}")
-    print(f"  tokens slim  : ~{slim:,}")
-    print(f"  tokens saved : ~{saved:,}")
+    print(f"  slim has saved you ~{saved:,} tokens")
+    print(f"  across {s['runs']:,} commands ({pct:.0f}% smaller output)")
+    print("=" * 48)
+    print(f"  raw output   : ~{raw:,} tokens")
+    print(f"  after slim   : ~{slim:,} tokens")
     print(f"  reduction    : {pct:5.1f}%  [{_bar(pct)}]")
-    if is_real_tokenizer():
-        print(f"  (~ counted with {tokenizer_name()}; approximates Claude's tokenizer)")
-    else:
-        print(f"  (~ rough {tokenizer_name()}; pip install slim-shady for real counts)")
 
     big = s["biggest"]
     if big["cmd"]:
-        print(f"\n  biggest save : {big['saved']:,} tokens")
-        print(f"                 ({big['cmd']})")
-
-    if s["losses"]:
-        print(f"\n  note: {s['losses']} run(s) got bigger, not smaller "
-              "(tiny outputs where the summary costs more).")
+        print(f"  biggest save : ~{big['saved']:,} tokens ({big['cmd']})")
 
     if s["by_tool"]:
-        print("\n  by tool:")
+        print("  by tool:")
         for tool, t in sorted(s["by_tool"].items()):
             tsaved = t["raw"] - t["slim"]
             tpct = (tsaved / t["raw"] * 100) if t["raw"] else 0
-            print(f"    {tool:<5} {t['runs']:>4} runs   "
-                  f"{tsaved:>8,} saved   {tpct:5.1f}%")
-    print("=" * 44)
+            print(f"    {tool:<5} {t['runs']:>4} runs   ~{tsaved:>8,} saved   {tpct:5.1f}%")
+
+    tok = tokenizer_name()
+    note = f"counted with {tok}" if is_real_tokenizer() else f"rough {tok}"
+    print(f"  (~ {note})")
+    print("=" * 48)
 
 
 def cmd_reset():
@@ -307,19 +299,27 @@ def main(argv):
 
     cmd_str = " ".join([tool] + rest)
     raw_t, slim_t = estimate_tokens(raw_text), estimate_tokens(slim_text)
-    _record(tool, cmd_str, raw_t, slim_t)
-    _cache_last(cmd_str, raw_text, raw_t, slim_t)
+
+    # Never do worse than raw: if compression didn't shrink it, emit the original.
+    # This guarantees slim can only help or break even -- never inflate output.
+    if slim_t < raw_t:
+        out_text, out_t = slim_text, slim_t
+    else:
+        out_text, out_t = raw_text, raw_t
+
+    _record(tool, cmd_str, raw_t, out_t)
+    _cache_last(cmd_str, raw_text, raw_t, out_t)
 
     if show_raw:
-        pct = (raw_t - slim_t) / raw_t * 100 if raw_t else 0
+        pct = (raw_t - out_t) / raw_t * 100 if raw_t else 0
         print(f"=== RAW ({raw_t} tokens) ===")
         print(raw_text)
-        print(f"\n=== SLIM ({slim_t} tokens, -{pct:.0f}%) ===")
+        print(f"\n=== SLIM ({out_t} tokens, -{pct:.0f}%) ===")
 
-    print(slim_text)
+    print(out_text)
     # Tell the reader compression happened and how to recover the full output.
-    if slim_t < raw_t:
-        print(f"[slim: hid ~{raw_t - slim_t} tokens - run 'slim expand' for full output]")
+    if out_t < raw_t:
+        print(f"[slim: hid ~{raw_t - out_t} tokens - run 'slim expand' for full output]")
     return rc
 
 
