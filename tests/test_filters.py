@@ -25,7 +25,7 @@ def test_truncate_middle_keeps_head_and_tail():
     out = common.truncate_middle(lines, head=5, tail=3)
     assert out[:5] == ["0", "1", "2", "3", "4"]
     assert out[-3:] == ["97", "98", "99"]
-    assert any("hidden by slim" in l for l in out)
+    assert any("hidden by slim" in line for line in out)
 
 
 def test_truncate_middle_noop_when_short():
@@ -66,3 +66,62 @@ def test_git_generic_dedupes_and_strips():
     assert "same  (x3)" in out
     assert "other" in out
     assert "\x1b[" not in out
+
+
+# ---- security regressions ---------------------------------------------------
+# These pin down the two audit findings (command injection, tiktoken crash) and
+# the path-scoping bug so they can't silently come back.
+
+def test_npm_run_uses_shell_false_and_arg_list(monkeypatch):
+    """A malicious argument like 'pkg & echo x' must arrive as ONE literal argv
+    element, never get joined into a string a shell could re-parse."""
+    captured = {}
+
+    class FakeResult:
+        stdout = ""
+        stderr = ""
+        returncode = 0
+
+    def fake_run(args, **kwargs):
+        captured["args"] = args
+        captured["shell"] = kwargs.get("shell")
+        return FakeResult()
+
+    monkeypatch.setattr(npm_filter.subprocess, "run", fake_run)
+    npm_filter._run(["npm", "install", "pkg & echo INJECTED"])
+
+    assert captured["shell"] is False
+    assert isinstance(captured["args"], list)
+    assert "pkg & echo INJECTED" in captured["args"]
+
+
+def test_estimate_tokens_survives_special_token_string():
+    # tiktoken raises ValueError on strings like <|endoftext|> unless
+    # disallowed_special=() is passed; this must never crash the whole command.
+    n = common.estimate_tokens("commit mentions <|endoftext|> in the message")
+    assert n >= 1
+
+
+def test_git_status_appends_extra_args(monkeypatch):
+    captured = {}
+
+    def fake_run(args):
+        captured["args"] = args
+        return "", 0
+
+    monkeypatch.setattr(git_filter, "_run", fake_run)
+    git_filter._status(["--", "src/"])
+    assert captured["args"][:4] == ["git", "status", "--porcelain=v1", "-b"]
+    assert captured["args"][4:] == ["--", "src/"]
+
+
+def test_git_log_appends_extra_args(monkeypatch):
+    captured = {}
+
+    def fake_run(args):
+        captured["args"] = args
+        return "", 0
+
+    monkeypatch.setattr(git_filter, "_run", fake_run)
+    git_filter._log(["--author=alice"])
+    assert captured["args"] == ["git", "log", "--oneline", "-n", "20", "--author=alice"]
