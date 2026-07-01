@@ -4,6 +4,7 @@ Unlike git, we DON'T re-run npm (installs/tests have side effects and are slow).
 We run the agent's actual command once and compress the captured output.
 """
 import re
+import shutil
 import subprocess
 
 from .common import strip_ansi, dedupe_consecutive, truncate_middle
@@ -27,12 +28,16 @@ KEEP_RE = re.compile(
 
 
 def _run(args):
-    # npm is npm.cmd on Windows -> needs shell resolution.
+    # args[0] is the literal string "npm"; resolve its real (.cmd) path so we can
+    # run it with shell=False -- joining args into a shell=True string let shell
+    # metacharacters in any argument (e.g. "pkg & del ...") execute as a second
+    # command. shutil.which resolves the npm.cmd shim without needing a shell.
+    npm_path = shutil.which("npm") or shutil.which("npm.cmd") or "npm"
     proc = subprocess.run(
-        " ".join(args),
+        [npm_path] + args[1:],
         capture_output=True,
         text=True,
-        shell=True,
+        shell=False,
     )
     return (proc.stdout or "") + (proc.stderr or ""), proc.returncode
 
@@ -40,7 +45,7 @@ def _run(args):
 def handle(sub, args):
     """Returns (raw_text, slim_text, rc). npm is run exactly once."""
     raw, rc = _run(["npm"] + args)
-    lines = [strip_ansi(l).rstrip() for l in raw.splitlines()]
+    lines = [strip_ansi(line).rstrip() for line in raw.splitlines()]
 
     if sub in ("install", "i", "ci", "add"):
         return raw, _install(lines), rc
@@ -52,8 +57,8 @@ def handle(sub, args):
 def _install(lines):
     kept = []
     dropped = 0
-    for l in lines:
-        s = l.strip()
+    for line in lines:
+        s = line.strip()
         if not s:
             continue
         if s.startswith(NOISE_PREFIXES):
@@ -70,7 +75,7 @@ def _install(lines):
 
 def _test(lines):
     # Keep failures and summaries; truncate the long passing list.
-    important = [l for l in lines if l.strip() and KEEP_RE.search(l)]
+    important = [line for line in lines if line.strip() and KEEP_RE.search(line)]
     important = dedupe_consecutive(important)
     if not important:
         return _generic(lines)
@@ -78,5 +83,5 @@ def _test(lines):
 
 
 def _generic(lines):
-    lines = [l for l in lines if l.strip()]
+    lines = [line for line in lines if line.strip()]
     return "\n".join(truncate_middle(dedupe_consecutive(lines)))

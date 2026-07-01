@@ -33,10 +33,19 @@ def _get_encoder():
 
 
 def estimate_tokens(text: str) -> int:
-    """Count tokens with tiktoken if available, else the ~4 chars/token heuristic."""
+    """Count tokens with tiktoken if available, else the ~4 chars/token heuristic.
+
+    disallowed_special=() tells tiktoken to treat strings like <|endoftext|> as
+    plain text instead of raising -- command output (commit messages, filenames,
+    npm READMEs) can legitimately contain such substrings. The try/except is a
+    last-resort net: encode() must never crash the whole command.
+    """
     enc = _get_encoder()
     if enc is not None:
-        return max(1, len(enc.encode(text)))
+        try:
+            return max(1, len(enc.encode(text, disallowed_special=())))
+        except Exception:
+            pass
     return max(1, len(text) // 4)
 
 
