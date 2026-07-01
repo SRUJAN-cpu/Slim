@@ -1,0 +1,66 @@
+name: Bug report
+description: Something doesn't work as expected
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. slim is Windows-only and wraps `git`/`npm` —
+        please fill in as much as you can so it's reproducible.
+
+  - type: input
+    id: version
+    attributes:
+      label: slim version
+      description: Output of `slim --version`
+      placeholder: "slim 0.2.0"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How did you install slim?
+      options:
+        - pip install slim-shady
+        - Downloaded slim.exe from Releases
+        - Ran from source (python slim.py)
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What did you run, what did you expect, what actually happened?
+      placeholder: |
+        Command: slim git status
+        Expected: compact status output
+        Actual: crash / wrong output / etc.
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: Full output / error / traceback
+      description: Paste the exact output. Use `slim --raw <cmd>` if relevant to show before/after.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: "`slim doctor` output"
+      description: Run `slim doctor` and paste the result — helps rule out install/hook issues fast.
+      render: shell
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Is this a security issue?
+      description: If this could let a command execute unintended code (injection-style), please report it privately instead — see SECURITY.md — and do NOT file a public issue.
+      options:
+        - label: I confirm this is not a security vulnerability (or I've already reported it privately per SECURITY.md)
+          required: true

@@ -1,0 +1,46 @@
+name: Feature request
+description: Suggest a command, filter, or improvement
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        slim's current scope is intentionally narrow (Windows, `git` + `npm`).
+        Feature requests that fit that scope are most likely to be accepted —
+        see the README's "Scope & limitations" section.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      description: Describe the situation, not just the feature — helps evaluate alternatives.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What would you like slim to do? Include an example command/output if you can.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which area does this affect?
+      options:
+        - git filter
+        - npm filter
+        - hook / auto-rewrite (slim init)
+        - gain / doctor / expand
+        - packaging / install
+        - other
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any workarounds you're using today, or other tools you compared against.
