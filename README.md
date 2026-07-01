@@ -37,9 +37,10 @@ pip install slim-shady
 Gives you the `slim` command (plus `tiktoken` for real token counts).
 
 ### Or download the .exe (no Python needed)
-1. Grab `slim.exe` from the [latest release](https://github.com/SRUJAN-cpu/slim-shady/releases/latest).
-2. Put it in a folder on your `PATH`.
-3. Run `slim git status`. (You only need `git`/`npm` installed — the tools it wraps.)
+1. Grab `slim.exe` (and `SHA256SUMS`) from the [latest release](https://github.com/SRUJAN-cpu/slim-shady/releases/latest).
+2. Optionally verify it: `certutil -hashfile slim.exe SHA256` and compare to `SHA256SUMS`.
+3. Put it in a folder on your `PATH`.
+4. Run `slim git status`. (You only need `git`/`npm` installed — the tools it wraps.)
 
 ## Quick start
 
@@ -119,6 +120,13 @@ build.bat        # produces dist\slim.exe (bundles tiktoken, fully offline)
 - tiktoken approximates Claude's tokenizer, so counts aren't Claude-exact (`~`).
 - Some Unicode glyphs (e.g. ✓) can be mangled by the Windows console; failures and
   summaries are always preserved.
+
+## Security
+
+slim runs entirely locally — it never sends your commands, output, or repo
+contents over the network. See [SECURITY.md](SECURITY.md) to report a
+vulnerability. CI runs `ruff` (lint) and `bandit` (security scanning) on every
+change.
 
 ## License
 
