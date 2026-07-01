@@ -24,7 +24,7 @@ import installer
 from filters import git_filter, npm_filter
 from filters.common import estimate_tokens, tokenizer_name, is_real_tokenizer
 
-__version__ = "0.1.4"
+__version__ = "0.2.0"
 
 # Tools slim wraps, and operators that make a blind `slim ` prefix unsafe.
 WRAP = ("git", "npm")
@@ -86,11 +86,19 @@ def _record(tool, cmd_str, raw_t, slim_t):
     _save_stats(stats)
 
 
+# Cap what we persist to ~/.slim/last_output.txt so one huge command output
+# can't grow the cache file without bound.
+MAX_CACHE_CHARS = 500_000
+
+
 def _cache_last(cmd_str, raw_text, raw_t, slim_t):
     """Stash the full output so `slim expand` can recover anything slim hid."""
+    text = raw_text
+    if len(text) > MAX_CACHE_CHARS:
+        text = text[:MAX_CACHE_CHARS] + "\n... (truncated by slim's cache size cap) ..."
     os.makedirs(STATS_DIR, exist_ok=True)
     with open(LAST_OUTPUT_FILE, "w", encoding="utf-8") as f:
-        f.write(raw_text)
+        f.write(text)
     with open(LAST_META_FILE, "w", encoding="utf-8") as f:
         json.dump({"cmd": cmd_str, "raw_tokens": raw_t, "slim_tokens": slim_t}, f)
 
@@ -212,8 +220,8 @@ def cmd_hook():
             os.makedirs(STATS_DIR, exist_ok=True)
             with open(os.path.join(STATS_DIR, "hook_debug.log"), "a", encoding="utf-8") as f:
                 f.write(raw_in + "\n")
-        except Exception:
-            pass
+        except OSError as e:
+            print(f"slim: SLIM_HOOK_DEBUG log write failed: {e}", file=sys.stderr)
 
     try:
         data = json.loads(raw_in)

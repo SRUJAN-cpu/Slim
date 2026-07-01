@@ -30,16 +30,18 @@ def handle(sub, args):
     """
     raw, rc = _run(["git"] + args)
     if sub == "status":
-        return raw, _status(), rc
+        return raw, _status(args[1:]), rc
     if sub == "log":
-        return raw, _log(), rc
+        return raw, _log(args[1:]), rc
     if sub in ("diff", "show"):
         return raw, _diff(args), rc
     return raw, _generic(raw), rc
 
 
-def _status():
-    raw, rc = _run(["git", "status", "--porcelain=v1", "-b"])
+def _status(extra):
+    # extra = any paths/flags the caller passed after 'status' (e.g. '-- src/'),
+    # appended so a scoped call doesn't silently widen to the whole repo.
+    raw, rc = _run(["git", "status", "--porcelain=v1", "-b"] + extra)
     lines = raw.splitlines()
     if not lines:
         return "(clean working tree, no output)"
@@ -87,8 +89,10 @@ def _status():
     return "\n".join(out)
 
 
-def _log():
-    raw, _ = _run(["git", "log", "--oneline", "-n", "20"])
+def _log(extra):
+    # extra = any flags/paths the caller passed after 'log' (e.g. '--author=x',
+    # '-- file.py'), appended so a scoped call doesn't silently widen to all commits.
+    raw, _ = _run(["git", "log", "--oneline", "-n", "20"] + extra)
     lines = raw.splitlines()
     text = "\n".join(truncate_middle(lines, head=20, tail=0))
     return text or "(no commits)"
