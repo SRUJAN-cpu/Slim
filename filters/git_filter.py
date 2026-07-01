@@ -34,7 +34,7 @@ def handle(sub, args):
     if sub == "log":
         return raw, _log(), rc
     if sub in ("diff", "show"):
-        return raw, _diff(sub), rc
+        return raw, _diff(args), rc
     return raw, _generic(raw), rc
 
 
@@ -94,9 +94,11 @@ def _log():
     return text or "(no commits)"
 
 
-def _diff(sub):
-    # Full diffs are large; show the stat summary instead.
-    raw, _ = _run(["git", sub, "--stat"])
+def _diff(args):
+    # Full diffs are large; show the stat summary instead, respecting the paths
+    # the caller passed. --stat must come before paths, so insert it right after
+    # the subcommand (args[0] is 'diff'/'show').
+    raw, _ = _run(["git", args[0], "--stat"] + args[1:])
     lines = strip_ansi(raw).splitlines()
     return "\n".join(truncate_middle(lines, head=40, tail=2)) or "(no changes)"
 

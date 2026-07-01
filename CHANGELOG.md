@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+- Fix: `git diff`/`git show` now respect the paths you pass, summarizing only
+  those files instead of the whole working tree. Removes wrong-scope output and
+  the spurious "got bigger" losses it caused in `slim gain`.
+
 ## 0.1.2
 - Fix: the auto-rewrite hook now fires for any shell tool (Bash, PowerShell, cmd),
   not just Bash. `slim hook` decides from the command, and `slim init` registers
